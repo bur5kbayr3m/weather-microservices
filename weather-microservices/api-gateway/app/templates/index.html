@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Weather Mesh</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-a: #061a1f;
+      --bg-b: #0f3d3e;
+      --panel: rgba(245, 254, 252, 0.9);
+      --ink: #0a2626;
+      --accent: #f5a623;
+      --ok: #197278;
+      --danger: #b00020;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: 'Space Grotesk', sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 10% 10%, rgba(245,166,35,0.28), transparent 35%),
+        radial-gradient(circle at 90% 25%, rgba(25,114,120,0.35), transparent 30%),
+        linear-gradient(130deg, var(--bg-a), var(--bg-b));
+      display: grid;
+      place-items: center;
+      padding: 1.5rem;
+    }
+
+    .card {
+      width: min(780px, 100%);
+      background: var(--panel);
+      border: 2px solid rgba(10, 38, 38, 0.1);
+      border-radius: 20px;
+      box-shadow: 0 22px 70px rgba(0, 0, 0, 0.25);
+      padding: 1.2rem;
+      animation: rise 0.45s ease-out;
+    }
+
+    @keyframes rise {
+      from { opacity: 0; transform: translateY(14px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    h1 {
+      margin: 0 0 0.2rem;
+      font-size: clamp(1.5rem, 2.8vw, 2.3rem);
+      letter-spacing: 0.02em;
+    }
+
+    p {
+      margin-top: 0;
+      color: rgba(10, 38, 38, 0.75);
+    }
+
+    form {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 0.75rem;
+      margin-top: 1rem;
+    }
+
+    input, button {
+      width: 100%;
+      border-radius: 12px;
+      border: 1px solid rgba(10, 38, 38, 0.2);
+      font-size: 0.95rem;
+      padding: 0.75rem 0.85rem;
+      font-family: inherit;
+    }
+
+    button {
+      background: var(--accent);
+      border: none;
+      color: #082121;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 0.2s ease, filter 0.2s ease;
+    }
+
+    button:hover { transform: translateY(-1px); filter: brightness(1.03); }
+
+    .result {
+      margin-top: 1rem;
+      border-radius: 14px;
+      padding: 1rem;
+      background: rgba(255, 255, 255, 0.65);
+      font-family: 'IBM Plex Mono', monospace;
+      white-space: pre-wrap;
+      min-height: 130px;
+    }
+
+    .ok { border-left: 5px solid var(--ok); }
+    .error { border-left: 5px solid var(--danger); }
+  </style>
+</head>
+<body>
+  <main class="card">
+    <h1>Weather Mesh</h1>
+    <p>JWT ile giris yap, sehir yaz, gateway uzerinden mikroservislerden hava durumunu cek.</p>
+
+    <form id="weather-form">
+      <input id="username" placeholder="Kullanici (student)" value="student" required />
+      <input id="password" placeholder="Sifre (student123)" value="student123" required />
+      <input id="city" placeholder="Sehir (Istanbul)" value="Istanbul" required />
+      <input id="notify" placeholder="Bildirim hedefi (opsiyonel)" value="ogrenci@example.com" />
+      <button type="submit">Hava Durumu Getir</button>
+    </form>
+
+    <section id="result" class="result">Sonuclar burada gorunecek...</section>
+  </main>
+
+  <script>
+    const form = document.getElementById('weather-form');
+    const result = document.getElementById('result');
+
+    function show(data, ok) {
+      result.className = `result ${ok ? 'ok' : 'error'}`;
+      result.textContent = JSON.stringify(data, null, 2);
+    }
+
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      result.textContent = 'Yukleniyor...';
+
+      const username = document.getElementById('username').value;
+      const password = document.getElementById('password').value;
+      const city = document.getElementById('city').value;
+      const notify = document.getElementById('notify').value;
+
+      try {
+        const loginRes = await fetch('/api/v1/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, password })
+        });
+        const loginData = await loginRes.json();
+        if (!loginRes.ok) {
+          show(loginData, false);
+          return;
+        }
+
+        const token = loginData.access_token;
+        const params = new URLSearchParams({ city });
+        if (notify) params.set('notify', notify);
+
+        const weatherRes = await fetch(`/api/v1/weather?${params.toString()}`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        const weatherData = await weatherRes.json();
+        show(weatherData, weatherRes.ok);
+      } catch (error) {
+        show({ error: String(error) }, false);
+      }
+    });
+  </script>
+</body>
+</html>

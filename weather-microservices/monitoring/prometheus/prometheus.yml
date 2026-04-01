@@ -1,0 +1,19 @@
+global:
+  scrape_interval: 10s
+
+scrape_configs:
+  - job_name: api-gateway
+    static_configs:
+      - targets: ['api-gateway:8080']
+  - job_name: auth-service
+    static_configs:
+      - targets: ['auth-service:5000']
+  - job_name: weather-service
+    static_configs:
+      - targets: ['weather-service:5000']
+  - job_name: notification-service
+    static_configs:
+      - targets: ['notification-service:5000']
+  - job_name: otel-collector
+    static_configs:
+      - targets: ['otel-collector:8889']
