@@ -1,0 +1,27 @@
+{
+  "typeCheckingMode": "basic",
+  "pythonVersion": "3.11",
+  "analysis": {
+    "ignore": [
+      "**/.*",
+      "**/node_modules",
+      "**/.*/**",
+      "**/__pycache__",
+      "**/venv",
+      "**/.venv"
+    ],
+    "extraPaths": []
+  },
+  "reportUnknownMemberType": "warning",
+  "reportUnknownParameterType": "warning",
+  "reportUnknownVariableType": "warning",
+  "reportMissingTypeStubs": false,
+  "reportPrivateUsage": "warning", 
+  "reportUnusedImport": true,
+  "reportUnusedClass": true,
+  "reportUnusedFunction": false,
+  "reportConstantRedefinition": true,
+  "reportIncompatibleMethodOverride": "warning",
+  "reportIncompatibleVariableOverride": "warning",
+  "reportUnknownArgumentType": "information"
+}

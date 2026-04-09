@@ -1,0 +1,231 @@
+version: '3.8'
+
+services:
+  # Auth Service - Secure authentication with JWT
+  auth-service:
+    build: ./auth-service
+    container_name: weather-auth
+    ports:
+      - "5001:5000"
+    environment:
+      - FLASK_ENV=development
+      - FLASK_DEBUG=true
+      - JWT_SECRET_KEY=dev-secret-key-min-32-chars-required12345
+      - JWT_ALGORITHM=HS256
+      - ACCESS_TOKEN_EXPIRE_MINUTES=15
+      - REFRESH_TOKEN_EXPIRE_DAYS=7
+    networks:
+      - weather-net
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:5000/health')"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+
+  # Weather Service - Get weather data with clean architecture
+  weather-service:
+    build: ./weather-service
+    container_name: weather-api
+    ports:
+      - "5002:5000"
+    environment:
+      - FLASK_ENV=development
+      - FLASK_DEBUG=true
+      - JWT_SECRET_KEY=dev-secret-key-min-32-chars-required12345
+      - RABBITMQ_HOST=rabbitmq
+      - RABBITMQ_USER=guest
+      - RABBITMQ_PASSWORD=guest
+      - MIN_PASSWORD_LENGTH=12
+      - ENVIRONMENT=development
+    depends_on:
+      - rabbitmq
+      - auth-service
+    networks:
+      - weather-net
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:5000/health')"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+
+  # Notification Service - Process weather events
+  notification-service:
+    build: ./notification-service
+    container_name: weather-notify
+    ports:
+      - "5003:5000"
+    environment:
+      - FLASK_ENV=development
+      - FLASK_DEBUG=true
+      - RABBITMQ_HOST=rabbitmq
+      - RABBITMQ_USER=guest
+      - RABBITMQ_PASSWORD=guest
+    depends_on:
+      - rabbitmq
+    networks:
+      - weather-net
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:5000/health')"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+
+  # Recommendation Service (NEW!) - AI-powered weather recommendations
+  recommendation-service:
+    build: ./recommendation-service
+    container_name: weather-recommendations
+    ports:
+      - "5004:5000"
+    environment:
+      - FLASK_ENV=development
+      - FLASK_DEBUG=true
+      - JWT_SECRET_KEY=dev-secret-key-min-32-chars-required12345
+    depends_on:
+      - auth-service
+    networks:
+      - weather-net
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:5000/health')"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+
+  # API Gateway - Request routing with security & rate limiting
+  api-gateway:
+    build: ./api-gateway
+    container_name: weather-gateway
+    ports:
+      - "8080:8080"
+    environment:
+      - FLASK_ENV=development
+      - FLASK_DEBUG=true
+      - JWT_SECRET_KEY=dev-secret-key-min-32-chars-required12345
+      - AUTH_SERVICE_URL=http://auth-service:5000
+      - WEATHER_SERVICE_URL=http://weather-service:5000
+      - RECOMMENDATION_SERVICE_URL=http://recommendation-service:5000
+      - ENABLE_RATE_LIMITING=true
+      - DEFAULT_REQUESTS_PER_MINUTE=60
+      - LOGIN_REQUESTS_PER_MINUTE=5
+      - WEATHER_REQUESTS_PER_MINUTE=30
+      - RATE_LIMIT_BY=ip
+    depends_on:
+      - auth-service
+      - weather-service
+      - recommendation-service
+    networks:
+      - weather-net
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8080/health')"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+
+  # RabbitMQ - Message broker
+  rabbitmq:
+    image: rabbitmq:3.13-management
+    container_name: weather-rabbitmq
+    environment:
+      - RABBITMQ_DEFAULT_USER=guest
+      - RABBITMQ_DEFAULT_PASS=guest
+    ports:
+      - "5672:5672"      # AMQP port
+      - "15672:15672"    # Management UI
+    networks:
+      - weather-net
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  # Prometheus - Metrics collection
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: weather-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    networks:
+      - weather-net
+
+  # Grafana - Visualization
+  grafana:
+    image: grafana/grafana:latest
+    container_name: weather-grafana
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_USERS_ALLOW_SIGN_UP=false
+    volumes:
+      - ./monitoring/grafana/provisioning:/etc/grafana/provisioning
+      - grafana_data:/var/lib/grafana
+    depends_on:
+      - prometheus
+    networks:
+      - weather-net
+
+  # Jaeger - Distributed tracing
+  jaeger:
+    image: jaegertracing/all-in-one:latest
+    container_name: weather-jaeger
+    ports:
+      - "16686:16686"  # UI
+      - "6831:6831/udp"  # Thrift compact
+      - "4317:4317"    # OTLP gRPC
+      - "4318:4318"    # OTLP HTTP
+    networks:
+      - weather-net
+
+  # OpenTelemetry Collector
+  otel-collector:
+    image: otel/opentelemetry-collector:latest
+    container_name: weather-otel
+    command: ["--config=/etc/otel-collector-config.yml"]
+    volumes:
+      - ./monitoring/otel-collector/otel-collector-config.yml:/etc/otel-collector-config.yml
+    ports:
+      - "4317:4317"    # OTLP gRPC
+      - "4318:4318"    # OTLP HTTP
+      - "9411:9411"    # Zipkin
+    depends_on:
+      - jaeger
+    networks:
+      - weather-net
+
+  # Loki - Log aggregation
+  loki:
+    image: grafana/loki:latest
+    container_name: weather-loki
+    ports:
+      - "3100:3100"
+    volumes:
+      - ./monitoring/loki/loki-config.yaml:/etc/loki/local-config.yaml
+      - loki_data:/loki
+    command: -config.file=/etc/loki/local-config.yaml
+    networks:
+      - weather-net
+
+  # Promtail - Log shipper
+  promtail:
+    image: grafana/promtail:latest
+    container_name: weather-promtail
+    volumes:
+      - ./monitoring/promtail/promtail-config.yml:/etc/promtail/config.yml
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+    command: -config.file=/etc/promtail/config.yml
+    depends_on:
+      - loki
+    networks:
+      - weather-net
+
+networks:
+  weather-net:
+    driver: bridge
+
+volumes:
+  prometheus_data:
+  grafana_data:
+  loki_data:
