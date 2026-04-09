@@ -23,7 +23,14 @@ class OpenMeteoWeatherProvider(WeatherProvider):
 
         weather_response = requests.get(
             self.WEATHER_URL,
-            params={"latitude": latitude, "longitude": longitude, "current": "temperature_2m,wind_speed_10m,weather_code"},
+            params={
+                "latitude": latitude,
+                "longitude": longitude,
+                "current": (
+                    "temperature_2m,relative_humidity_2m,precipitation,"
+                    "cloud_cover,wind_speed_10m,weather_code"
+                ),
+            },
             timeout=8,
         )
         weather_response.raise_for_status()
@@ -34,6 +41,9 @@ class OpenMeteoWeatherProvider(WeatherProvider):
             latitude=latitude,
             longitude=longitude,
             temperature_c=weather_data.get("temperature_2m", 0.0),
+            humidity_percent=weather_data.get("relative_humidity_2m", 0.0),
+            precipitation_mm=weather_data.get("precipitation", 0.0),
+            cloud_cover_percent=weather_data.get("cloud_cover", 0.0),
             wind_speed_kmh=weather_data.get("wind_speed_10m", 0.0),
             weather_code=weather_data.get("weather_code", -1),
         )

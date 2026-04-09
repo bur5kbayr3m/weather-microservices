@@ -11,14 +11,23 @@
     :root {
       --bg-a: #061a1f;
       --bg-b: #0f3d3e;
-      --panel: rgba(245, 254, 252, 0.9);
+      --panel: rgba(245, 254, 252, 0.93);
+      --panel-strong: rgba(255, 255, 255, 0.98);
       --ink: #0a2626;
+      --muted: rgba(10, 38, 38, 0.72);
       --accent: #f5a623;
       --ok: #197278;
       --danger: #b00020;
+      --outline: rgba(10, 38, 38, 0.12);
+      --chip: rgba(10, 38, 38, 0.08);
+      --shadow: rgba(0, 0, 0, 0.22);
+      --skin: #ead9c5;
+      --hair: #39261e;
     }
 
-    * { box-sizing: border-box; }
+    * {
+      box-sizing: border-box;
+    }
 
     body {
       margin: 0;
@@ -26,38 +35,93 @@
       font-family: 'Space Grotesk', sans-serif;
       color: var(--ink);
       background:
-        radial-gradient(circle at 10% 10%, rgba(245,166,35,0.28), transparent 35%),
-        radial-gradient(circle at 90% 25%, rgba(25,114,120,0.35), transparent 30%),
+        radial-gradient(circle at 10% 10%, rgba(245, 166, 35, 0.28), transparent 35%),
+        radial-gradient(circle at 90% 25%, rgba(25, 114, 120, 0.35), transparent 30%),
         linear-gradient(130deg, var(--bg-a), var(--bg-b));
-      display: grid;
-      place-items: center;
-      padding: 1.5rem;
+      padding: 1.25rem;
     }
 
     .card {
-      width: min(780px, 100%);
+      width: min(1200px, 100%);
+      margin: 0 auto;
       background: var(--panel);
       border: 2px solid rgba(10, 38, 38, 0.1);
-      border-radius: 20px;
-      box-shadow: 0 22px 70px rgba(0, 0, 0, 0.25);
-      padding: 1.2rem;
+      border-radius: 24px;
+      box-shadow: 0 22px 70px var(--shadow);
+      padding: 1.25rem;
       animation: rise 0.45s ease-out;
     }
 
     @keyframes rise {
-      from { opacity: 0; transform: translateY(14px); }
-      to { opacity: 1; transform: translateY(0); }
+      from {
+        opacity: 0;
+        transform: translateY(14px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .hero {
+      display: flex;
+      gap: 0.9rem;
+      align-items: flex-start;
+      justify-content: space-between;
+      flex-wrap: wrap;
     }
 
     h1 {
       margin: 0 0 0.2rem;
-      font-size: clamp(1.5rem, 2.8vw, 2.3rem);
+      font-size: clamp(1.5rem, 2.8vw, 2.5rem);
       letter-spacing: 0.02em;
     }
 
-    p {
-      margin-top: 0;
-      color: rgba(10, 38, 38, 0.75);
+    .subtitle {
+      margin: 0;
+      color: var(--muted);
+      max-width: 72ch;
+      line-height: 1.5;
+    }
+
+    .badge {
+      align-self: center;
+      padding: 0.6rem 0.9rem;
+      border-radius: 999px;
+      background: rgba(25, 114, 120, 0.12);
+      color: var(--ok);
+      font-weight: 700;
+      font-size: 0.9rem;
+      letter-spacing: 0.03em;
+      white-space: nowrap;
+    }
+
+    .workspace {
+      margin-top: 1rem;
+      display: grid;
+      grid-template-columns: minmax(340px, 1.1fr) minmax(320px, 0.9fr);
+      gap: 1rem;
+      align-items: stretch;
+    }
+
+    .panel {
+      background: var(--panel-strong);
+      border: 1px solid var(--outline);
+      border-radius: 20px;
+      box-shadow: 0 14px 28px rgba(0, 0, 0, 0.08);
+      padding: 1rem;
+    }
+
+    .panel h2 {
+      margin: 0 0 0.45rem;
+      font-size: 1.05rem;
+    }
+
+    .panel p.note {
+      margin: 0 0 1rem;
+      color: var(--muted);
+      font-size: 0.95rem;
+      line-height: 1.45;
     }
 
     form {
@@ -67,7 +131,8 @@
       margin-top: 1rem;
     }
 
-    input, button {
+    input,
+    button {
       width: 100%;
       border-radius: 12px;
       border: 1px solid rgba(10, 38, 38, 0.2);
@@ -85,45 +150,524 @@
       transition: transform 0.2s ease, filter 0.2s ease;
     }
 
-    button:hover { transform: translateY(-1px); filter: brightness(1.03); }
-
-    .result {
-      margin-top: 1rem;
-      border-radius: 14px;
-      padding: 1rem;
-      background: rgba(255, 255, 255, 0.65);
-      font-family: 'IBM Plex Mono', monospace;
-      white-space: pre-wrap;
-      min-height: 130px;
+    button:hover {
+      transform: translateY(-1px);
+      filter: brightness(1.03);
     }
 
-    .ok { border-left: 5px solid var(--ok); }
-    .error { border-left: 5px solid var(--danger); }
+    .content-grid {
+      display: grid;
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+
+    .result {
+      border-radius: 14px;
+      padding: 1rem;
+      background: rgba(255, 255, 255, 0.72);
+      font-family: 'IBM Plex Mono', monospace;
+      white-space: pre-wrap;
+      min-height: 220px;
+      border-left: 5px solid transparent;
+    }
+
+    .result pre {
+      margin: 0;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    .ok {
+      border-left-color: var(--ok);
+    }
+
+    .error {
+      border-left-color: var(--danger);
+    }
+
+    .result-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem;
+      margin-bottom: 0.65rem;
+      font-family: 'Space Grotesk', sans-serif;
+    }
+
+    .result-header strong {
+      font-size: 0.98rem;
+    }
+
+    .result-header span {
+      color: var(--muted);
+      font-size: 0.85rem;
+    }
+
+    .model-shell {
+      display: grid;
+      gap: 1rem;
+      height: 100%;
+    }
+
+    .model-stage {
+      position: relative;
+      min-height: 560px;
+      border-radius: 20px;
+      background:
+        radial-gradient(circle at 50% 30%, rgba(245, 166, 35, 0.16), transparent 35%),
+        linear-gradient(180deg, rgba(7, 38, 44, 0.96), rgba(14, 79, 81, 0.93));
+      overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.04);
+    }
+
+    .stage-title {
+      position: absolute;
+      top: 1rem;
+      left: 1rem;
+      right: 1rem;
+      display: flex;
+      justify-content: space-between;
+      gap: 0.75rem;
+      z-index: 2;
+      color: #edf8f7;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .stage-title h2 {
+      margin: 0;
+      font-size: 1rem;
+      letter-spacing: 0.02em;
+    }
+
+    .stage-title .tiny {
+      margin: 0;
+      color: rgba(237, 248, 247, 0.78);
+      font-size: 0.88rem;
+    }
+
+    .mannequin-wrap {
+      position: absolute;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      padding-top: 2.75rem;
+    }
+
+    .mannequin {
+      width: min(94%, 360px);
+      filter: drop-shadow(0 24px 28px rgba(0, 0, 0, 0.35));
+      --outfit-outer: #197278;
+      --outfit-top: #f5a623;
+      --outfit-bottom: #0a2626;
+      --outfit-accent: #c7d7d5;
+    }
+
+    .mannequin-svg {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+
+    .skin-fill {
+      fill: #ead9c5;
+    }
+
+    .skin-stroke {
+      stroke: rgba(42, 34, 28, 0.26);
+      stroke-width: 1.3;
+    }
+
+    .hair-fill {
+      fill: var(--hair);
+    }
+
+    .body-base {
+      fill: #cad8d6;
+    }
+
+    .fabric-outline {
+      stroke: rgba(15, 24, 32, 0.28);
+      stroke-width: 1.8;
+      stroke-linejoin: round;
+      stroke-linecap: round;
+    }
+
+    .outerwear {
+      fill: var(--outfit-outer);
+      transition: fill 260ms ease, opacity 260ms ease;
+    }
+
+    .top {
+      fill: var(--outfit-top);
+      transition: fill 260ms ease, opacity 260ms ease;
+    }
+
+    .bottom {
+      fill: var(--outfit-bottom);
+      transition: fill 260ms ease, opacity 260ms ease;
+    }
+
+    .scarf {
+      fill: var(--outfit-accent);
+      transition: fill 260ms ease, opacity 260ms ease;
+    }
+
+    .hat {
+      fill: var(--outfit-accent);
+      transition: fill 260ms ease, opacity 260ms ease;
+    }
+
+    .garment-highlight {
+      fill: rgba(255, 255, 255, 0.2);
+    }
+
+    .garment-shadow {
+      fill: rgba(0, 0, 0, 0.18);
+    }
+
+    .stitch {
+      stroke: rgba(255, 255, 255, 0.2);
+      stroke-width: 1.2;
+      stroke-linecap: round;
+      stroke-dasharray: 2 4;
+      fill: none;
+    }
+
+    .shoe {
+      fill: #161e25;
+    }
+
+    .surface-shadow {
+      fill: rgba(8, 17, 24, 0.2);
+    }
+
+    .sole {
+      fill: #0e141a;
+    }
+
+    .subtle-breathe {
+      animation: breathe 4.8s ease-in-out infinite;
+      transform-origin: center;
+      transform-box: fill-box;
+    }
+
+    @keyframes breathe {
+      0% { transform: translateY(0); }
+      50% { transform: translateY(3px); }
+      100% { transform: translateY(0); }
+    }
+
+    .chips {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      margin: 0.75rem 0 0;
+    }
+
+    .chip {
+      border-radius: 999px;
+      background: var(--chip);
+      padding: 0.45rem 0.7rem;
+      font-size: 0.86rem;
+      color: var(--ink);
+      border: 1px solid rgba(10, 38, 38, 0.08);
+    }
+
+    .detail-stack {
+      margin-top: 0.8rem;
+      display: grid;
+      gap: 0.8rem;
+    }
+
+    .detail-box {
+      border-radius: 14px;
+      padding: 0.85rem 0.9rem;
+      background: rgba(255, 255, 255, 0.7);
+      border: 1px solid rgba(10, 38, 38, 0.08);
+    }
+
+    .detail-box strong {
+      display: block;
+      margin-bottom: 0.3rem;
+    }
+
+    .detail-box ul {
+      margin: 0;
+      padding-left: 1.1rem;
+      color: var(--muted);
+      line-height: 1.45;
+    }
+
+    .footer-note {
+      margin-top: 0.85rem;
+      font-size: 0.88rem;
+      color: var(--muted);
+    }
+
+    @media (max-width: 960px) {
+      .workspace {
+        grid-template-columns: 1fr;
+      }
+
+      .model-stage {
+        min-height: 520px;
+      }
+    }
+
+    @media (max-width: 640px) {
+      body {
+        padding: 0.8rem;
+      }
+
+      .card {
+        padding: 0.95rem;
+        border-radius: 18px;
+      }
+
+      .model-stage {
+        min-height: 480px;
+      }
+
+      .mannequin {
+        transform: scale(0.9);
+        transform-origin: top center;
+      }
+    }
   </style>
 </head>
 <body>
   <main class="card">
-    <h1>Weather Mesh</h1>
-    <p>JWT ile giris yap, sehir yaz, gateway uzerinden mikroservislerden hava durumunu cek.</p>
+    <div class="hero">
+      <div>
+        <h1>Weather Mesh</h1>
+        <p class="subtitle">JWT ile giris yap, adres/sehir yaz, hava durumuna gore kombin ve renk onerilerini gor. Sag tarafta 2D model otomatik olarak giydirilir.</p>
+      </div>
+      <div class="badge">AI Outfit Studio</div>
+    </div>
 
-    <form id="weather-form">
-      <input id="username" placeholder="Kullanici (student)" value="student" required />
-      <input id="password" placeholder="Sifre (student123)" value="student123" required />
-      <input id="city" placeholder="Sehir (Istanbul)" value="Istanbul" required />
-      <input id="notify" placeholder="Bildirim hedefi (opsiyonel)" value="ogrenci@example.com" />
-      <button type="submit">Hava Durumu Getir</button>
-    </form>
+    <div class="workspace">
+      <section class="panel">
+        <h2>Giris ve Hava Sorusu</h2>
+        <p class="note">Adres veya sehir girin. Cevapta hem hava ozeti hem de hava durumuna uygun renk ve kiyafet kombinleri gosterilir.</p>
 
-    <section id="result" class="result">Sonuclar burada gorunecek...</section>
+        <form id="weather-form">
+          <input id="username" placeholder="Kullanici (student)" value="student" required />
+          <input id="password" placeholder="Sifre (student123)" value="student123" required />
+          <input id="city" placeholder="Adres veya sehir (Istanbul)" value="Istanbul" required />
+          <input id="notify" placeholder="Bildirim hedefi (opsiyonel)" value="ogrenci@example.com" />
+          <button type="submit">Hava + Kombin Getir</button>
+        </form>
+
+        <div class="content-grid">
+          <section id="result" class="result">Sonuclar burada gorunecek...</section>
+        </div>
+      </section>
+
+      <aside class="panel model-shell">
+        <div>
+          <h2>2D Kombin Modeli</h2>
+          <p class="note">Renkler, mont, ust, alt ve aksesuarlar hava durumuna gore bu model uzerinde guncellenir.</p>
+        </div>
+
+        <section class="model-stage" aria-label="Kombin modeli">
+          <div class="stage-title">
+            <div>
+              <h2 id="outfit-title">Model bekleniyor</h2>
+              <p class="tiny" id="outfit-mood">Hava verisi geldikten sonra kombin oluşturulacak.</p>
+            </div>
+            <div class="tiny" id="weather-note">--</div>
+          </div>
+
+          <div class="mannequin-wrap">
+            <div class="mannequin" id="mannequin">
+              <svg class="mannequin-svg" viewBox="0 0 360 520" role="img" aria-label="2D kombin modeli">
+                <defs>
+                  <radialGradient id="skinShade" cx="38%" cy="30%" r="74%">
+                    <stop offset="0%" stop-color="#f3e4d4" />
+                    <stop offset="100%" stop-color="#d7bea4" />
+                  </radialGradient>
+                  <linearGradient id="sleeveShade" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stop-color="#d2e0de" />
+                    <stop offset="100%" stop-color="#a4b8b6" />
+                  </linearGradient>
+                  <linearGradient id="trouserShade" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stop-color="rgba(255,255,255,0.12)" />
+                    <stop offset="100%" stop-color="rgba(0,0,0,0.26)" />
+                  </linearGradient>
+                  <radialGradient id="coatLight" cx="50%" cy="0%" r="100%">
+                    <stop offset="0%" stop-color="rgba(255,255,255,0.2)" />
+                    <stop offset="70%" stop-color="rgba(255,255,255,0)" />
+                  </linearGradient>
+                </defs>
+
+                <ellipse class="surface-shadow" cx="180" cy="490" rx="78" ry="20"></ellipse>
+
+                <g class="subtle-breathe">
+                  <path class="hair-fill" d="M132 94c0-37 24-58 50-58s50 21 50 58v20h-100z"></path>
+                  <ellipse class="skin-fill skin-stroke" cx="182" cy="106" rx="38" ry="44" fill="url(#skinShade)"></ellipse>
+                  <rect class="skin-fill skin-stroke" x="168" y="142" width="28" height="20" rx="10"></rect>
+
+                  <ellipse class="hat fabric-outline" id="hat" cx="182" cy="88" rx="52" ry="10"></ellipse>
+
+                  <path fill="url(#sleeveShade)" class="fabric-outline" d="M114 186c-21 25-33 60-32 116 0 13 10 21 20 19 10-1 15-10 15-19 1-41 9-72 24-95z"></path>
+                  <path fill="url(#sleeveShade)" class="fabric-outline" d="M250 186c21 25 33 60 32 116 0 13-10 21-20 19-10-1-15-10-15-19-1-41-9-72-24-95z"></path>
+
+                  <path class="outerwear fabric-outline" id="outerwear" d="M124 170h116l30 30v132c0 30-24 54-54 54h-68c-30 0-54-24-54-54V200z"></path>
+                  <path fill="url(#coatLight)" d="M128 174h108l25 25v9H102v-9z"></path>
+                  <path class="garment-shadow" d="M124 306h146v30c0 28-22 50-50 50h-46c-28 0-50-22-50-50z"></path>
+                  <path class="stitch" d="M180 200v182"></path>
+
+                  <path class="top fabric-outline" id="topwear" d="M138 224h88c21 0 38 17 38 38v36c0 24-20 44-44 44h-76c-24 0-44-20-44-44v-36c0-21 17-38 38-38z"></path>
+                  <path class="garment-highlight" d="M145 237h74a28 28 0 0 1 28 28v8h-130v-8a28 28 0 0 1 28-28z"></path>
+                  <rect class="scarf fabric-outline" id="scarf" x="102" y="202" width="160" height="16" rx="8"></rect>
+
+                  <path class="bottom fabric-outline" id="bottomwear" d="M142 336h76c18 0 33 14 33 32l-9 104c-1 11-10 20-21 20h-18c-9 0-17-7-18-16l-4-73-4 73c-1 9-9 16-18 16h-20c-11 0-20-9-21-20l-9-104c0-18 15-32 33-32z"></path>
+                  <path fill="url(#trouserShade)" d="M145 338h70c16 0 29 12 30 28l-5 66h-55v-94h-11v94h-55l-5-66c1-16 14-28 31-28z"></path>
+                  <line class="fabric-outline" x1="181" y1="338" x2="181" y2="492"></line>
+
+                  <path class="shoe fabric-outline" d="M118 488h54c7 0 13 6 13 13v6h-80v-6c0-7 6-13 13-13z"></path>
+                  <path class="shoe fabric-outline" d="M188 488h54c7 0 13 6 13 13v6h-80v-6c0-7 6-13 13-13z"></path>
+                  <rect class="sole" x="105" y="505" width="80" height="4" rx="2"></rect>
+                  <rect class="sole" x="175" y="505" width="80" height="4" rx="2"></rect>
+                </g>
+              </svg>
+            </div>
+          </div>
+        </section>
+
+        <div class="detail-stack">
+          <div class="detail-box">
+            <strong>Renk Paleti</strong>
+            <div class="chips" id="color-chips">
+              <span class="chip">bekleniyor</span>
+            </div>
+          </div>
+          <div class="detail-box">
+            <strong>Parcalar</strong>
+            <ul id="piece-list">
+              <li>Kombin bilgisi gelince burada gosterilecek.</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="footer-note" id="style-tip">Model, havaya gore otomatik olarak renk ve katman secer.</div>
+      </aside>
+    </div>
   </main>
 
   <script>
     const form = document.getElementById('weather-form');
     const result = document.getElementById('result');
+    const outfitTitle = document.getElementById('outfit-title');
+    const outfitMood = document.getElementById('outfit-mood');
+    const weatherNote = document.getElementById('weather-note');
+    const colorChips = document.getElementById('color-chips');
+    const pieceList = document.getElementById('piece-list');
+    const styleTip = document.getElementById('style-tip');
+    const mannequin = document.getElementById('mannequin');
+    const outerwear = document.getElementById('outerwear');
+    const topwear = document.getElementById('topwear');
+    const bottomwear = document.getElementById('bottomwear');
+    const scarf = document.getElementById('scarf');
+    const hat = document.getElementById('hat');
+
+    const paletteMap = {
+      siyah: '#1d2328',
+      'kömür grisi': '#40464c',
+      gri: '#7d868f',
+      antrasit: '#353d44',
+      lacivert: '#193b66',
+      'koyu lacivert': '#112c52',
+      mavi: '#4f82b8',
+      'açık mavi': '#9ec3e8',
+      beyaz: '#f5f7fa',
+      krem: '#f2e8d8',
+      bej: '#d8c2a0',
+      camel: '#b5895b',
+      bordo: '#6f1d2d',
+      'zeytin yeşili': '#7a8550',
+      haki: '#6b7550',
+      'açık yeşil': '#badbaf',
+      'koyu yeşil': '#264d40',
+      turuncu: '#d97c2b',
+      sarı: '#d8ae2c',
+      pembe: '#d57aa5',
+      füme: '#6a6f75'
+    };
 
     function show(data, ok) {
       result.className = `result ${ok ? 'ok' : 'error'}`;
-      result.textContent = JSON.stringify(data, null, 2);
+      result.innerHTML = `
+        <div class="result-header">
+          <strong>${ok ? 'Sonuç hazır' : 'Hata'}</strong>
+          <span>${ok ? 'Hava ve kombin verisi geldi' : 'Istek basarisiz oldu'}</span>
+        </div>
+        <pre>${JSON.stringify(data, null, 2)}</pre>
+      `;
+    }
+
+    function pickColor(name, fallback = '#7d868f') {
+      if (!name) {
+        return fallback;
+      }
+
+      const normalized = String(name).trim().toLowerCase();
+      return paletteMap[normalized] || fallback;
+    }
+
+    function setModelColors(outfit) {
+      if (!outfit) {
+        return;
+      }
+
+      const colors = Array.isArray(outfit.colors) ? outfit.colors : [];
+      const primary = pickColor(colors[0], '#197278');
+      const secondary = pickColor(colors[1], '#f5a623');
+      const bottom = pickColor(colors[2], '#0a2626');
+      const accent = pickColor(colors[3], '#c7d7d5');
+
+      mannequin.style.setProperty('--outfit-outer', primary);
+      mannequin.style.setProperty('--outfit-top', secondary);
+      mannequin.style.setProperty('--outfit-bottom', bottom);
+      mannequin.style.setProperty('--outfit-accent', accent);
+
+      outfitTitle.textContent = outfit.title || 'Kombin hazir';
+      outfitMood.textContent = outfit.mood || 'Hava durumuna uygun kombin olusturuldu.';
+      weatherNote.textContent = outfit.weather_note || 'Hava notu yok.';
+      styleTip.textContent = outfit.style_tip || 'Kombin otomatik olarak secildi.';
+
+      colorChips.innerHTML = '';
+      (colors.length ? colors : ['renk bilgisi yok']).forEach((color) => {
+        const chip = document.createElement('span');
+        chip.className = 'chip';
+        chip.textContent = color;
+        colorChips.appendChild(chip);
+      });
+
+      pieceList.innerHTML = '';
+      const pieces = Array.isArray(outfit.pieces) ? outfit.pieces : [];
+      (pieces.length ? pieces : ['Kiyafet bilgisi yok']).forEach((piece) => {
+        const item = document.createElement('li');
+        item.textContent = piece;
+        pieceList.appendChild(item);
+      });
+
+      const title = String(outfit.title || '').toLowerCase();
+      const piecesText = pieces.join(' ').toLowerCase();
+      const isCold = title.includes('soğuk') || title.includes('soguk') || title.includes('serin');
+      const isRainy = title.includes('yağmurlu') || title.includes('yagmurlu');
+      const isHot = title.includes('sıcak') || title.includes('sicak');
+      const needsHat = /bere|sapka|şapka|kapuson|kapüşon/.test(piecesText);
+      const needsScarf = /atki|atkı|fular|boyunluk/.test(piecesText);
+      const hasOuterwearPiece = /mont|ceket|hırka|hirka|trenckot|kaban|overshirt|yağmurluk|yagmurluk/.test(piecesText);
+
+      outerwear.style.opacity = isCold || isRainy || hasOuterwearPiece ? '1' : '0.28';
+      topwear.style.opacity = '1';
+      bottomwear.style.opacity = isHot ? '0.88' : '1';
+      scarf.style.opacity = needsScarf || isCold ? '1' : '0.18';
+      hat.style.opacity = needsHat || isCold ? '1' : '0.14';
     }
 
     form.addEventListener('submit', async (event) => {
@@ -141,6 +685,7 @@
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ username, password })
         });
+
         const loginData = await loginRes.json();
         if (!loginRes.ok) {
           show(loginData, false);
@@ -149,13 +694,20 @@
 
         const token = loginData.access_token;
         const params = new URLSearchParams({ city });
-        if (notify) params.set('notify', notify);
+        if (notify) {
+          params.set('notify', notify);
+        }
 
         const weatherRes = await fetch(`/api/v1/weather?${params.toString()}`, {
           headers: { Authorization: `Bearer ${token}` }
         });
+
         const weatherData = await weatherRes.json();
         show(weatherData, weatherRes.ok);
+
+        if (weatherRes.ok && weatherData.outfit_recommendation) {
+          setModelColors(weatherData.outfit_recommendation);
+        }
       } catch (error) {
         show({ error: String(error) }, false);
       }

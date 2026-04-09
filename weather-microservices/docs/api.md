@@ -31,8 +31,38 @@ Response:
   "latitude": 41.01,
   "longitude": 28.95,
   "temperature_c": 21.3,
+  "humidity_percent": 63,
+  "precipitation_mm": 0.0,
+  "cloud_cover_percent": 35,
   "wind_speed_kmh": 9.4,
   "weather_code": 1
+}
+```
+
+### POST /api/v1/outfit
+Headers:
+- `Authorization: Bearer <jwt>`
+
+Request body:
+```json
+{
+  "temperature_c": 21.3,
+  "humidity_percent": 63,
+  "precipitation_mm": 0.0,
+  "cloud_cover_percent": 35,
+  "wind_speed_kmh": 9.4,
+  "weather_code": 1
+}
+```
+
+Response:
+```json
+{
+  "title": "Ilık Hava Kombini",
+  "mood": "denge ve rahatlık",
+  "colors": ["krem", "camel", "açık gri", "zeytin yeşili"],
+  "pieces": ["İnce triko veya gömlek", "Straight fit jean veya chino pantolon"],
+  "weather_note": "Hava dengeli; smart casual bir kombin iyi çalışır."
 }
 ```
 

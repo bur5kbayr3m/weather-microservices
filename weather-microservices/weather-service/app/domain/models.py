@@ -7,6 +7,9 @@ class WeatherData:
     latitude: float
     longitude: float
     temperature_c: float
+    humidity_percent: float
+    precipitation_mm: float
+    cloud_cover_percent: float
     wind_speed_kmh: float
     weather_code: int
 

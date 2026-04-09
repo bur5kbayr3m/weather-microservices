@@ -48,11 +48,13 @@ $login = Invoke-RestMethod -Method Post -Uri http://localhost:8080/api/v1/login 
 $token = $login.access_token
 ```
 
-4. Hava durumunu sorgula (internetten Open-Meteo verisi ceker):
+4. Hava durumunu ve kombin onerilerini sorgula (internetten Open-Meteo verisi ceker):
 
 ```powershell
 Invoke-RestMethod -Method Get -Uri "http://localhost:8080/api/v1/weather?city=Istanbul&notify=ogrenci@example.com" -Headers @{ Authorization = "Bearer $token" }
 ```
+
+Bu istegin cevabinda `outfit_recommendation` alanı da doner; renkler, kiyafet parcasi ve havaya uygun stil notu icerdir.
 
 ## Arayuzler
 

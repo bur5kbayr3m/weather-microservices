@@ -7,14 +7,20 @@ import time
 
 import pika
 from flask import Flask, jsonify
-from opentelemetry import trace
-from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
-from opentelemetry.instrumentation.flask import FlaskInstrumentor
-from opentelemetry.sdk.resources import SERVICE_NAME, Resource
-from opentelemetry.sdk.trace import TracerProvider
-from opentelemetry.sdk.trace.export import BatchSpanProcessor
 from prometheus_flask_exporter import PrometheusMetrics
 from pythonjsonlogger import jsonlogger
+
+try:
+    from opentelemetry import trace
+    from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
+    from opentelemetry.instrumentation.flask import FlaskInstrumentor
+    from opentelemetry.sdk.resources import SERVICE_NAME, Resource
+    from opentelemetry.sdk.trace import TracerProvider
+    from opentelemetry.sdk.trace.export import BatchSpanProcessor
+
+    OTEL_ENABLED = True
+except Exception:
+    OTEL_ENABLED = False
 
 
 recent_notifications: list[dict[str, object]] = []
@@ -30,6 +36,9 @@ def configure_logging() -> None:
 
 
 def configure_tracing() -> None:
+    if not OTEL_ENABLED:
+        return
+
     endpoint = os.getenv("OTEL_EXPORTER_OTLP_ENDPOINT", "http://otel-collector:4317")
     provider = TracerProvider(resource=Resource.create({SERVICE_NAME: "notification-service"}))
     provider.add_span_processor(BatchSpanProcessor(OTLPSpanExporter(endpoint=endpoint, insecure=True)))
@@ -71,7 +80,8 @@ def create_app() -> Flask:
 
     app = Flask(__name__)
     PrometheusMetrics(app)
-    FlaskInstrumentor().instrument_app(app)
+    if OTEL_ENABLED:
+        FlaskInstrumentor().instrument_app(app)
 
     if os.getenv("DISABLE_CONSUMER", "false").lower() != "true":
         worker = threading.Thread(target=consume_events, daemon=True)
@@ -92,4 +102,4 @@ app = create_app()
 
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000)
+    app.run(host="0.0.0.0", port=int(os.getenv("PORT", "5000")))

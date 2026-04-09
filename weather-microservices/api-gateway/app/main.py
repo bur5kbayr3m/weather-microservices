@@ -21,8 +21,17 @@ except Exception:
     OTEL_ENABLED = False
 
 
-AUTH_SERVICE_URL = os.getenv("AUTH_SERVICE_URL", "http://auth-service:5000")
-WEATHER_SERVICE_URL = os.getenv("WEATHER_SERVICE_URL", "http://weather-service:5000")
+# Local-first defaults make manual Flask startup work without Docker.
+AUTH_SERVICE_URL = os.getenv("AUTH_SERVICE_URL", "http://127.0.0.1:5001")
+WEATHER_SERVICE_URL = os.getenv("WEATHER_SERVICE_URL", "http://127.0.0.1:5002")
+RECOMMENDATION_SERVICE_URL = os.getenv("RECOMMENDATION_SERVICE_URL", "http://127.0.0.1:5004")
+
+
+def json_or_text(resp: requests.Response):
+    try:
+        return resp.json()
+    except ValueError:
+        return {"raw": resp.text}
 
 
 def configure_tracing() -> None:
@@ -62,29 +71,61 @@ def create_app() -> Flask:
 
     @app.post("/api/v1/login")
     def login():
-        upstream_response = session.post(
-            f"{AUTH_SERVICE_URL}/login", json=request.get_json(silent=True) or {}, timeout=5
-        )
-        return jsonify(upstream_response.json()), upstream_response.status_code
+        try:
+            upstream_response = session.post(
+                f"{AUTH_SERVICE_URL}/login", json=request.get_json(silent=True) or {}, timeout=5
+            )
+        except requests.RequestException as exc:
+            return jsonify({"error": "auth service unavailable", "details": str(exc)}), 503
+
+        return jsonify(json_or_text(upstream_response)), upstream_response.status_code
 
     @app.get("/api/v1/weather")
     def get_weather():
         auth_header = request.headers.get("Authorization", "")
 
-        verify_response = session.post(
-            f"{AUTH_SERVICE_URL}/verify", headers={"Authorization": auth_header}, timeout=5
-        )
+        try:
+            verify_response = session.post(
+                f"{AUTH_SERVICE_URL}/verify", headers={"Authorization": auth_header}, timeout=5
+            )
+        except requests.RequestException as exc:
+            return jsonify({"error": "auth service unavailable", "details": str(exc)}), 503
+
         if verify_response.status_code != 200:
-            return jsonify({"error": "unauthorized", "details": verify_response.json()}), 401
+            return jsonify({"error": "unauthorized", "details": json_or_text(verify_response)}), 401
 
         city = request.args.get("city", "Istanbul")
         notify_target = request.args.get("notify")
-        upstream_response = session.get(
-            f"{WEATHER_SERVICE_URL}/weather",
-            params={"city": city, "notify": notify_target},
-            timeout=10,
-        )
-        return jsonify(upstream_response.json()), upstream_response.status_code
+        try:
+            upstream_response = session.get(
+                f"{WEATHER_SERVICE_URL}/weather",
+                params={"city": city, "notify": notify_target},
+                timeout=10,
+            )
+        except requests.RequestException as exc:
+            return jsonify({"error": "weather service unavailable", "details": str(exc)}), 503
+
+        weather_data = json_or_text(upstream_response)
+        if upstream_response.status_code >= 400:
+            return jsonify(weather_data), upstream_response.status_code
+
+        outfit_payload = None
+        try:
+            outfit_response = session.post(
+                f"{RECOMMENDATION_SERVICE_URL}/api/v1/outfit",
+                json=weather_data,
+                timeout=10,
+            )
+            if outfit_response.status_code == 200:
+                outfit_payload = outfit_response.json()
+        except Exception:
+            outfit_payload = None
+
+        combined_response = dict(weather_data)
+        if outfit_payload:
+            combined_response["outfit_recommendation"] = outfit_payload
+
+        return jsonify(combined_response), upstream_response.status_code
 
     return app
 
